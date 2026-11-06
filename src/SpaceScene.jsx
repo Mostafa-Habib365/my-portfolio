@@ -219,8 +219,12 @@ export default function SpaceScene() {
           const ny = (sy - (r.top + r.height / 2)) / halfH
           if (Math.abs(nx) >= 1 || Math.abs(ny) >= 1) continue
           const len = Math.hypot(nx, ny) || 1
-          velocity.x += (nx / len) * AVOID_PUSH * dt
-          velocity.y -= (ny / len) * AVOID_PUSH * dt // screen y points down, world y points up
+          // Push grows from zero at the box edge to full strength a quarter of the way in. An on/off push
+          // made objects bounce in and out of the edge (the "vibrating" look) when they couldn't escape.
+          const depth = Math.min(1, (1 - Math.max(Math.abs(nx), Math.abs(ny))) * 4)
+          velocity.x += (nx / len) * AVOID_PUSH * depth * dt
+          velocity.y -= (ny / len) * AVOID_PUSH * depth * dt // screen y points down, world y points up
+          velocity.multiplyScalar(1 - Math.min(1, dt * 4 * depth)) // extra drag while pressed against content, so it settles
         }
 
         // The cursor nudges objects away, as if pushing them in zero gravity
@@ -240,9 +244,12 @@ export default function SpaceScene() {
         velocity.multiplyScalar(1 - Math.min(1, dt * 1.5))
         offset.addScaledVector(velocity, dt)
 
-        // Never get pushed off screen
-        offset.x = THREE.MathUtils.clamp(offset.x, -hw + 0.6 - homeX, hw - 0.6 - homeX)
-        offset.y = THREE.MathUtils.clamp(offset.y, -hh + 0.6 - homeY, hh - 0.6 - homeY)
+        // Never get pushed off screen; stop dead at the edge instead of building up speed against it
+        const clampedX = THREE.MathUtils.clamp(offset.x, -hw + 0.6 - homeX, hw - 0.6 - homeX)
+        const clampedY = THREE.MathUtils.clamp(offset.y, -hh + 0.6 - homeY, hh - 0.6 - homeY)
+        if (clampedX !== offset.x) velocity.x = 0
+        if (clampedY !== offset.y) velocity.y = 0
+        offset.set(clampedX, clampedY)
 
         const bob = Math.sin(time * bobSpeed + bobPhase) * BOB_HEIGHT
         mesh.position.x = homeX + offset.x
