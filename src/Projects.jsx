@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 
 const GITHUB_USER = 'Mostafa-Habib365'
 const MAX_PROJECTS = 9
-const CACHE_KEY = `github-repos-v3:${GITHUB_USER}` // bump the version when the saved shape changes
+const HIDDEN_REPOS = ['my-portfolio'] // repos left out of the Projects section (lowercase)
+const CACHE_KEY = `github-repos-v4:${GITHUB_USER}` // bump the version when the saved shape changes
 
 const languageColors = {
   JavaScript: '#f1e05a',
@@ -60,7 +61,7 @@ async function loadRepos(signal) {
   const res = await fetch(`https://api.github.com/users/${GITHUB_USER}/repos?per_page=100&sort=updated`, { signal })
   if (!res.ok) throw new Error(`GitHub responded ${res.status}`)
   const repos = (await res.json())
-    .filter((r) => !r.fork && r.name.toLowerCase() !== GITHUB_USER.toLowerCase()) // skip forks and the profile README repo
+    .filter((r) => !r.fork && r.name.toLowerCase() !== GITHUB_USER.toLowerCase() && !HIDDEN_REPOS.includes(r.name.toLowerCase())) // skip forks, the profile README repo and hidden repos
     .slice(0, MAX_PROJECTS)
     .map((r) => ({
       id: r.id,
