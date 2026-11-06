@@ -190,7 +190,11 @@ export default function SpaceScene() {
       pointer = { x: (e.clientX / canvas.clientWidth) * 2 - 1, y: -((e.clientY / canvas.clientHeight) * 2 - 1) }
     }
     const onPointerLeave = () => (pointer = null)
+    // A finger never "leaves" the window, so let go of the push when it lifts or starts scrolling
+    const onTouchEnd = (e) => e.pointerType !== 'mouse' && (pointer = null)
     window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerup', onTouchEnd)
+    window.addEventListener('pointercancel', onTouchEnd)
     document.documentElement.addEventListener('pointerleave', onPointerLeave)
 
     const onScreen = new THREE.Vector3()
@@ -283,6 +287,8 @@ export default function SpaceScene() {
       clearTimeout(timer)
       canvas.removeEventListener('webglcontextlost', onContextLost)
       window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onTouchEnd)
+      window.removeEventListener('pointercancel', onTouchEnd)
       document.documentElement.removeEventListener('pointerleave', onPointerLeave)
       themeObserver.disconnect()
       resizeObserver.disconnect()

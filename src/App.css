@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  min-height: var(--header-h);
   padding: 0 clamp(16px, 4vw, 48px);
 }
 
@@ -70,16 +70,17 @@
 
 /* Room for the fixed nav bar */
 main {
-  padding-top: 64px;
+  padding-top: var(--header-h);
 }
 
 /* Each section fills most of the screen so one is in focus at a time */
 main > section {
   min-height: 80svh;
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* never wider than the screen, even with wide content inside */
   align-content: center;
   box-sizing: border-box;
-  scroll-margin-top: 64px; /* keep headings clear of the sticky nav */
+  scroll-margin-top: var(--header-h); /* keep headings clear of the sticky nav */
   transition: opacity 0.7s ease, translate 0.7s ease;
 }
 
@@ -90,7 +91,7 @@ main > section:not(.is-active) {
 }
 
 .hero {
-  min-height: calc(100svh - 64px);
+  min-height: calc(100svh - var(--header-h));
   justify-items: center;
   padding: 0 24px;
 }
@@ -105,7 +106,7 @@ main > section:not(.is-active) {
   inset: 0;
   z-index: -1;
   width: 100%;
-  height: 100%;
+  height: 100lvh;
   animation: fade-in 2.5s ease-out both;
 }
 
@@ -167,7 +168,7 @@ main > section:not(.is-active) {
 .experience-grid {
   display: grid;
   align-items: start; /* each card keeps its own height */
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 20px;
   margin-top: 32px;
   text-align: left;
@@ -269,7 +270,7 @@ main > section:not(.is-active) {
 
 .project-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 20px;
   margin-top: 32px;
   text-align: left;
@@ -302,10 +303,12 @@ main > section:not(.is-active) {
   translate: 0 0;
 }
 
-.project-card.visible:hover {
-  translate: 0 -6px;
-  box-shadow: inset 0 0 0 1px var(--accent-border), var(--shadow);
-  transition-delay: 0s;
+@media (hover: hover) {
+  .project-card.visible:hover {
+    translate: 0 -6px;
+    box-shadow: inset 0 0 0 1px var(--accent-border), var(--shadow);
+    transition-delay: 0s;
+  }
 }
 
 .project-card h3 {
@@ -377,8 +380,9 @@ main > section:not(.is-active) {
 /* About: education and languages */
 .about-facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 20px;
+  width: 100%;
   max-width: 860px;
   margin: 40px auto 0;
   text-align: left;
@@ -446,7 +450,7 @@ main > section:not(.is-active) {
 
 .contact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 20px;
   list-style: none;
   margin: 40px 0 0;
@@ -586,10 +590,12 @@ main > section:not(.is-active) {
   transition: border-color 0.2s, color 0.2s, rotate 0.4s ease;
 }
 
-.theme-toggle:hover {
-  border-color: var(--accent-border);
-  color: var(--accent);
-  rotate: 20deg;
+@media (hover: hover) {
+  .theme-toggle:hover {
+    border-color: var(--accent-border);
+    color: var(--accent);
+    rotate: 20deg;
+  }
 }
 
 .theme-toggle:focus-visible {
@@ -617,4 +623,44 @@ main > section:not(.is-active) {
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+
+:root {
+  --header-h: 64px;
+}
+
+/* Phones: name and theme button on top, links on a second row */
+@media (max-width: 640px) {
+  :root {
+    --header-h: 100px;
+  }
+  .site-header nav {
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: 8px;
+  }
+  .site-header ul {
+    order: 1;
+    width: 100%;
+    justify-content: space-between;
+    margin-left: 0;
+  }
+  .site-header .logo {
+    font-size: 20px;
+  }
+  .theme-toggle {
+    margin-left: auto;
+  }
+  .hero-title {
+    font-size: 20px;
+  }
+  .about,
+  .experience,
+  .projects,
+  .contact {
+    padding-inline: 16px;
+  }
+  .info-card {
+    padding: 20px;
+  }
 }
